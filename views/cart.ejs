@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина</title>
+</head>
+<body>
+    <h1>Корзина</h1>
+    <ul>
+        <% cart.items.forEach(item => { %>
+            <li><%= item.product.name %> - Количество: <%= item.quantity %> - Цена: <%= item.product.discountedPrice || item.product.price %> руб.</li>
+        <% }); %>
+    </ul>
+    <p>Общая стоимость: <%= cart.calculateTotal() %> руб.</p>
+    <form action="/cart/apply_promo" method="post">
+        <label for="promo_code">Промокод:</label>
+        <input type="text" name="promo_code">
+        <button type="submit">Применить промокод</button>
+    </form>
+</body>
+</html>
