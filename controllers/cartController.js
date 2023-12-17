@@ -48,7 +48,7 @@ router.post('/buy', async (req, res) => {
 
 router.post('/apply_promo', async (req, res) => {
     const promoCode = req.body.promo_code;
-    console.log(promoCode)
+    console.log(promoCode);
     const cart = req.cart;
 
     const promoCodesCollection = req.dbClient.db('PT_Lab2').collection('discount');
@@ -75,6 +75,7 @@ router.post('/apply_promo', async (req, res) => {
 
             // Пересчитываем общую стоимость с учетом скидки
             const cartTotal = cart.calculateTotal();
+            console.log('Cart Total After Applying Promo:', cartTotal);
 
             res.json({ success: true, cartTotal });
         } else {
@@ -85,6 +86,7 @@ router.post('/apply_promo', async (req, res) => {
         res.json({ success: false, errorMessage: 'Internal Server Error: ' + error.message });
     }
 });
+
 
 
 router.post('/checkout', async (req, res) => {
