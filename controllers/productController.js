@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { ObjectId } = require('mongodb'); // Добавлено
+const { ObjectId } = require('mongodb');
 
 router.get('/', async (req, res) => {
     const db = req.dbClient.db('PT_Lab2');
@@ -26,12 +26,12 @@ router.post('/add_to_cart', async (req, res) => {
     const quantity = parseInt(req.body.quantity);
 
     try {
-        // Получаем доступ к базе данных через клиент
+        // Получаем доступ к БД
         const db = req.dbClient.db('PT_Lab2');
         const productsCollection = db.collection('products');
         const cartsCollection = db.collection('carts');
 
-        // Находим товар в коллекции продуктов
+        // Находим товар
         const product = await productsCollection.findOne({ _id: new ObjectId(productId) });
 
         if (product) {
@@ -54,11 +54,8 @@ router.post('/add_to_cart', async (req, res) => {
             // Обновляем данные корзины в памяти
             req.cart.addItem(product, quantity);
 
-            // После успешного добавления товара в корзину, перенаправляем на главную страницу
-            res.redirect('/');
-        } else {
-            throw new Error('Товар не найден в базе данных');
         }
+
     } catch (error) {
         console.error('Ошибка при добавлении товара в корзину', error);
         res.status(500).send('Internal Server Error: ' + error.message);

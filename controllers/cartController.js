@@ -48,14 +48,13 @@ router.post('/buy', async (req, res) => {
 
 router.post('/apply_promo', async (req, res) => {
     const promoCode = req.body.promo_code;
-    console.log(promoCode);
     const cart = req.cart;
 
     const promoCodesCollection = req.dbClient.db('PT_Lab2').collection('discount');
 
     try {
         // Проверяем, был ли применен уже промокод
-        if (cart.appliedPromoCodes.includes(promoCode)) {
+        if (cart.appliedPromoCodes.length > 0) {
             res.json({ success: false, errorMessage: 'Промокод уже был применен' });
             return;
         }
@@ -70,12 +69,14 @@ router.post('/apply_promo', async (req, res) => {
                 item.product.discountedPrice = discountedPrice;
             });
 
-            // Добавляем промокод в список примененных в корзине
+            // Обновляем примененные промокоды в корзине
             cart.appliedPromoCodes.push(promoCode);
+
+            // Обновляем корзину в req, чтобы отразить изменения
+            req.cart = cart;
 
             // Пересчитываем общую стоимость с учетом скидки
             const cartTotal = cart.calculateTotal();
-            console.log('Cart Total After Applying Promo:', cartTotal);
 
             res.json({ success: true, cartTotal });
         } else {
@@ -87,13 +88,23 @@ router.post('/apply_promo', async (req, res) => {
     }
 });
 
-
-
 router.post('/checkout', async (req, res) => {
-    // Очищаем корзину и примененные промокоды
-    req.cart.clear();
-    // Отправляем уведомление о том, что заказ оформлен (может быть в виде алерта)
-    res.send('Заказ оформлен!');
+    const db = req.dbClient.db('PT_Lab2');
+    const cartsCollection = db.collection('carts');
+
+    try {
+        // Очищаем корзину и примененные промокоды
+        req.cart.clear();
+
+        // Удаляем запись о корзине из БД
+        await cartsCollection.deleteMany({});
+
+        res.redirect('/');
+
+    } catch (error) {
+        console.error('Ошибка при оформлении заказа', error);
+        res.status(500).send('Internal Server Error: ' + error.message);
+    }
 });
 
 module.exports = router;
