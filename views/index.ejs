@@ -4,15 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Корзина</title>
+    <style>
+      .hidden-form {
+          display: none;
+      }
+  </style>
 </head>
 <body>
   <h1>Список товаров</h1>
   <ul>
-    <% products.forEach((product, index) => { %>
+    <% products.forEach(product => { %>
       <li>
         <form action="/add_to_cart" method="post">
           <span><%= product.name %> - <%= product.discountedPrice %> руб.</span>
-          <input type="hidden" name="product_id" value="<%= index + 1 %>">
+          <input type="hidden" name="product_id" value="<%= product._id %>">
           <input type="number" name="quantity" value="1" min="1">
           <button type="submit">Добавить в корзину</button>
         </form>
@@ -21,4 +26,4 @@
   </ul>
   <a href="/cart">Перейти в корзину</a>
 </body>
-<!-- ... -->
+</html>

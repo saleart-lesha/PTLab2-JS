@@ -1,3 +1,4 @@
+<!-- cart.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,15 +9,60 @@
 <body>
     <h1>Корзина</h1>
     <ul>
-        <% cart.items.forEach(item => { %>
-            <li><%= item.product.name %> - Количество: <%= item.quantity %> - Цена: <%= item.product.discountedPrice || item.product.price %> руб.</li>
+        <% cartDetails.forEach(item => { %>
+            <li><%= item.name %> - Количество: <%= item.quantity %> - Цена: <%= item.totalCost %> руб.</li>
         <% }); %>
     </ul>
-    <p>Общая стоимость: <%= cart.calculateTotal() %> руб.</p>
-    <form action="/cart/apply_promo" method="post">
+    <% if (cartDiscount > 0) { %>
+        <p>Скидка: <%= cartDiscount %> руб.</p>
+    <% } %>
+    <p id="totalCost">Общая стоимость: <%= Math.max(cartTotal - cartDiscount, 0) %> руб.</p>
+    <form id="applyPromoForm">
         <label for="promo_code">Промокод:</label>
-        <input type="text" name="promo_code">
-        <button type="submit">Применить промокод</button>
+        <input type="text" id="promo_code" name="promo_code" <% if (cartDiscount > 0) { %> disabled <% } %>>
+        <button type="button" onclick="applyPromo()">Применить промокод</button>
     </form>
+    <% if (errorMessage) { %>
+        <script>
+            alert('<%= errorMessage %>');
+        </script>
+    <% } %>
+    <form action="/cart/checkout" method="post">
+        <button type="submit">Купить</button>
+    </form>
+
+    <script>
+        async function applyPromo() {
+            const promoCodeInput = document.getElementById('promo_code');
+            const promoCode = promoCodeInput.value;
+            console.log(promoCode)
+    
+            try {
+                const response = await fetch('/cart/apply_promo', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `promo_code=${encodeURIComponent(promoCode)}`,
+});
+
+                
+                console.log(response)
+                const data = await response.json();
+                console.log(data.success)
+    
+                if (data.success) {
+                    // Обновим общую стоимость
+                    document.getElementById('totalCost').innerText = 'Общая стоимость: ' + Math.max(data.cartTotal, 0) + ' руб.';
+                    alert('Промокод применен успешно');
+                } else {
+                    alert('Ошибка при применении промокода: ' + data.errorMessage);
+                }
+            } catch (error) {
+                console.error('Ошибка при применении промокода', error);
+                alert('Ошибка при применении промокода');
+            }
+        }
+    </script>
 </body>
 </html>

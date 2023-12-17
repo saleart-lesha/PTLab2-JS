@@ -1,14 +1,30 @@
 const express = require('express');
+const { MongoClient } = require('mongodb');
+
 const app = express();
 const Cart = require('./models/cart');
 const productController = require('./controllers/productController');
 const cartController = require('./controllers/cartController');
 
-const inMemoryCart = new Cart(); // Создаем корзину в памяти
+// Создаем корзину в памяти
+const inMemoryCart = new Cart();
+
+// Подключение к базе данных
+const uri = 'mongodb://127.0.0.1:27017/PT_Lab2';
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+client.connect()
+    .then(() => {
+        console.log('Успешное подключение к базе данных');
+    })
+    .catch(err => {
+        console.error('Ошибка подключения к базе данных', err);
+    });
 
 // Middleware для передачи корзины в запрос
 app.use((req, res, next) => {
     req.cart = inMemoryCart;
+    req.dbClient = client;
     next();
 });
 
