@@ -16,7 +16,7 @@
     <% products.forEach(product => { %>
       <li>
         <form action="/add_to_cart" method="post">
-          <span><%= product.name %> - <%= product.discountedPrice %> руб.</span>
+          <span><%= product.name %> - <%= product.price %> руб.</span>
           <input type="hidden" name="product_id" value="<%= product._id %>">
           <input type="number" name="quantity" value="1" min="1">
           <button type="submit">Добавить в корзину</button>

@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
         for (const item of cartItems) {
             const product = await productsCollection.findOne({ _id: new ObjectId(item.productId) });
 
-            const totalCost = (product.discountedPrice || product.price) * item.quantity;
+            const totalCost = (product.discountedPrice) * item.quantity;
 
             cartDetails.push({
                 name: product.name,
@@ -32,20 +32,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.post('/buy', async (req, res) => {
-    const db = req.dbClient.db('PT_Lab2');
-    const cartsCollection = db.collection('carts');
-
-    try {
-        console.log('Заказ оформлен');
-        await cartsCollection.deleteMany({});
-        res.send('Заказ оформлен!');
-    } catch (error) {
-        console.error('Ошибка при оформлении заказа', error);
-        res.status(500).send('Internal Server Error: ' + error.message);
-    }
-});
-
 router.post('/apply_promo', async (req, res) => {
     const promoCode = req.body.promo_code;
     const cart = req.cart;
@@ -53,7 +39,7 @@ router.post('/apply_promo', async (req, res) => {
     const promoCodesCollection = req.dbClient.db('PT_Lab2').collection('discount');
 
     try {
-        // Проверяем, был ли применен уже промокод
+        // Проверка применения промокода
         if (cart.appliedPromoCodes.length > 0) {
             res.json({ success: false, errorMessage: 'Промокод уже был применен' });
             return;
@@ -64,21 +50,23 @@ router.post('/apply_promo', async (req, res) => {
         if (promo) {
             const discountPercentage = promo.percentage;
 
+            // Применение скидки
             cart.items.forEach(item => {
                 const discountedPrice = item.product.price * (1 - discountPercentage / 100);
                 item.product.discountedPrice = discountedPrice;
+                item.totalCost = discountedPrice * item.quantity;
             });
 
-            // Обновляем примененные промокоды в корзине
+            // Добавляем промокод, как использованный
             cart.appliedPromoCodes.push(promoCode);
 
             // Обновляем корзину в req, чтобы отразить изменения
             req.cart = cart;
 
             // Пересчитываем общую стоимость с учетом скидки
-            const cartTotal = cart.calculateTotal();
+            const cartTotalWithDiscount = cart.calculateTotal();
 
-            res.json({ success: true, cartTotal });
+            res.json({ success: true, cartTotal: cartTotalWithDiscount, cartDetails: cart.items });
         } else {
             res.json({ success: false, errorMessage: 'Промокод не найден' });
         }
@@ -93,10 +81,10 @@ router.post('/checkout', async (req, res) => {
     const cartsCollection = db.collection('carts');
 
     try {
-        // Очищаем корзину и примененные промокоды
+        // Очистка корзины и промокодов
         req.cart.clear();
 
-        // Удаляем запись о корзине из БД
+        // Удаление записи о корзине из БД
         await cartsCollection.deleteMany({});
 
         res.redirect('/');

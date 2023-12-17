@@ -9,7 +9,16 @@
     <h1>Корзина</h1>
     <ul>
         <% cartDetails.forEach(item => { %>
-            <li><%= item.name %> - Количество: <%= item.quantity %> - Цена: <%= item.totalCost %> руб.</li>
+            <li>
+                <% if (item.name && item.quantity !== undefined && item.totalCost !== undefined) { %>
+                    <span id="product_<%= item.name %>">
+                        <%= item.name %> - Количество: <%= item.quantity %> - Цена: <%= item.totalCost %> руб.
+                    </span>
+                <% } %>
+                <% if (item.product && item.product.discountedPrice !== undefined && item.product.discountedPrice < item.product.price) { %>
+                    (Со скидкой <%= item.product.discountedPrice %> руб. за единицу)
+                <% } %>
+            </li>
         <% }); %>
     </ul>
     <% if (cartDiscount > 0) { %>
@@ -45,10 +54,16 @@
                 });
     
                 const data = await response.json();
-                console.log(data.cartTotal);
     
                 if (data.success) {
                     document.getElementById('totalCost').innerText = 'Общая стоимость: ' + Math.max(data.cartTotal, 0) + ' руб.';
+                    // Обновление цен после применения скидки
+                    data.cartDetails.forEach(item => {
+                        const productElement = document.getElementById('product_' + item.product.name);
+                        if (productElement) {
+                            productElement.innerHTML = `${item.product.name} - Количество: ${item.quantity} - Цена: ${item.totalCost} руб.`;
+                        }
+                    });
                     alert('Промокод применен успешно');
                 } else {
                     alert('Ошибка при применении промокода: ' + data.errorMessage);
