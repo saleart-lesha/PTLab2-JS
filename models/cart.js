@@ -5,34 +5,24 @@ class Cart {
     }
 
     addItem(product, quantity) {
-        this.items.push({ product, quantity });
-    }
-
-    applyDiscount(promo) {
-        const discountPercentage = promo.percentage;
-
-        // Применяем скидку к стоимости товаров в корзине
-        this.items.forEach(item => {
-            // Сохраняем оригинальную цену товара
-            const originalPrice = item.product.price;
-
-            // Рассчитываем новую цену со скидкой
-            item.product.discountedPrice = originalPrice * (1 - discountPercentage / 100);
-
-            // Обновляем общую стоимость с учетом скидки
-            item.totalCost = item.product.discountedPrice * item.quantity;
-        });
-        // Обновляем примененные промокоды в корзине
-        this.appliedPromoCodes.push(promo.code);
+        const item = {
+            product,
+            quantity: parseInt(quantity) || 1, // обработка некорректного количества
+            totalCost: (product.price || 0) * (parseInt(quantity) || 1), // инициализация totalCost при добавлении товара
+        };
+        this.items.push(item);
     }
 
     calculateTotal() {
-        return this.items.reduce((total, item) => total + item.totalCost, 0);
+        return this.items.reduce((total, item) => {
+            const price = item.product.discountedPrice || item.product.price || 0;
+            return total + price * item.quantity;
+        }, 0);
     }
 
     clear() {
         this.items = [];
-        this.appliedPromoCodes = []; // Сбрасываем примененные промокоды при очистке корзины
+        this.appliedPromoCodes = []; // Сбрасывание промокода при очистке корзины
     }
 }
 

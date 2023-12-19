@@ -6,7 +6,7 @@ const Cart = require('./models/cart');
 const productController = require('./controllers/productController');
 const cartController = require('./controllers/cartController');
 
-// Создаем корзину в памяти
+// Создание корзины в памяти
 const inMemoryCart = new Cart();
 
 // Подключение к базе данных
@@ -36,7 +36,7 @@ app.use('/', productController);
 app.use('/cart', cartController);
 
 // Запуск сервера
-const port = 3000;
+const port = 3001;
 app.listen(port, () => {
     console.log(`Сервер запущен на http://localhost:${port}`);
 });
