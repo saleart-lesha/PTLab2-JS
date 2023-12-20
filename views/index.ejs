@@ -1,29 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Корзина</title>
-    <style>
-      .hidden-form {
-          display: none;
-      }
-  </style>
-</head>
 <body>
-  <h1>Список товаров</h1>
-  <ul>
-    <% products.forEach(product => { %>
-      <li>
-        <form action="/add_to_cart" method="post">
-          <span><%= product.name %> - <%= product.price %> руб.</span>
-          <input type="hidden" name="product_id" value="<%= product._id %>">
-          <input type="number" name="quantity" value="1" min="1">
-          <button type="submit">Добавить в корзину</button>
-        </form>
-      </li>
-    <% }); %>
-  </ul>
-  <a href="/cart">Перейти в корзину</a>
+  <div id="app">
+    <h1>Магазин игрушек</h1>
+    <div>
+      <h2>Товары</h2>
+      <ul id="productsContainer">
+        <% products.forEach(product => { %>
+          <li>
+            <%= product.name %> - <%= product.price %> руб.
+            <% if (product.discountedPrice !== product.price) { %>
+              <span style="color: green;">(Стоимость со скидкой: <%= product.discountedPrice %> руб.)</span>
+            <% } %>
+          </li>
+        <% }); %>
+      </ul>
+    </div>
+    <div>
+      <h2>Промокод</h2>
+      <input type="text" id="promoCode" placeholder="Введите промокод">
+      <button onclick="applyDiscountClient()">Ввести</button>
+      <button onclick="resetPromoCodeClient()">Использовать другой промокод</button>
+      <p id="discountResult"></p>
+  </div>
+  </div>
+  <script src="/script.js"></script>
 </body>
-</html>
+
