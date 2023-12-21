@@ -116,3 +116,5 @@ async function resetPromoCodeClient() {
         console.error('Error resetting promo code:', error.message);
     }
 }
+
+module.exports = { applyDiscountClient, resetPromoCodeClient };
